@@ -4,6 +4,11 @@
  * @param {...string} fields - the properties paths to omit
  * @returns {object} - returns the new object
  */
-export const omit = (obj, ...fields) => {
-
+export const omit = (sourceObject, ...fields) => {
+  if (!Array.isArray(fields)) {
+    return {};
+  }
+  const filteredSourceEntries = Object.entries(sourceObject).filter(([key, _]) => !fields.includes(key));
+  return Object.fromEntries(filteredSourceEntries);
 };
+
