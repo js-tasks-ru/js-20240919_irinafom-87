@@ -13,12 +13,12 @@ export const pick = (sourceObject, ...fields) => {
 };
 
 export const pickFields = (sourceObject, ...fields) => {
-  let resultObject = {};
+  const resultObject = {};
   if (!Array.isArray(fields)) {
     return resultObject;
   }
 
-  for (let field of fields) {
+  for (const field of fields) {
     if (sourceObject[field]) {
       resultObject[field] = sourceObject[field];
     }
