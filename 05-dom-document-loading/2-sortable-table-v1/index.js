@@ -8,7 +8,7 @@ export default class SortableTable {
     this.fieldsFromHeader = this.headerConfig.map(object => object.id);
     this.element = this.createElement();
 
-    this.selectSubElements(false);
+    this.selectSubElements();
   }
 
   selectSubElements() {
@@ -26,9 +26,7 @@ export default class SortableTable {
     const sortFunction = orderValue === 'asc' ? sortAsc : sortDesc;
 
     this.data.sort(sortFunction);
-    this.element.innerHTML = this.createTemplate();
-
-    this.selectSubElements();
+    this.subElements.body.innerHTML = this.createRowsTemplate();
   }
 
   createElement() {
@@ -39,7 +37,7 @@ export default class SortableTable {
     return div.firstElementChild;
   }
 
-  createHeaderColumns() {
+  createHeaderColumnsTemplate() {
     let headerColumns = '';
     for (const headerColumnData of this.headerConfig) {
       headerColumns += `
@@ -51,7 +49,7 @@ export default class SortableTable {
     return headerColumns;
   }
 
-  createRows() {
+  createRowsTemplate() {
     let row = '';
     for (const item of this.data) {
       let cells = '';
@@ -74,11 +72,11 @@ export default class SortableTable {
         <div class="sortable-table">
 
           <div data-element="header" class="sortable-table__header sortable-table__row">
-            ${this.createHeaderColumns()}
+            ${this.createHeaderColumnsTemplate()}
           </div>
 
           <div data-element="body" class="sortable-table__body">
-            ${this.createRows()}
+            ${this.createRowsTemplate()}
           </div>
         </div>
     `;
