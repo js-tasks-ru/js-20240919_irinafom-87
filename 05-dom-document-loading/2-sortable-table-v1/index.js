@@ -6,7 +6,7 @@ export default class SortableTable {
     this.headerConfig = headerConfig;
     this.data = data;
     this.fieldsFromHeader = this.headerConfig.map(object => object.id);
-    this.element = this.createElement();
+    this.element = this.createElement(this.createTemplate());
 
     this.selectSubElements();
   }
@@ -29,10 +29,10 @@ export default class SortableTable {
     this.subElements.body.innerHTML = this.createRowsTemplate();
   }
 
-  createElement() {
+  createElement(template) {
     const div = document.createElement('div');
 
-    div.innerHTML = this.createTemplate();
+    div.innerHTML = template;
 
     return div.firstElementChild;
   }
