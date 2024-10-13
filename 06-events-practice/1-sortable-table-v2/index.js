@@ -13,6 +13,7 @@ export default class SortableTable extends TableCommmon {
 
     this.defaultSorted = {
       id: sorted.id,
+
       order: sorted.order
     };
 
@@ -21,17 +22,17 @@ export default class SortableTable extends TableCommmon {
     const defaultSortedCell = this.subElements.header.querySelectorAll(`[data-id=${this.defaultSorted.id}]`)?.[0];
     defaultSortedCell.append(this.arrow);
 
-    this.subElements.header.addEventListener('pointerdown', (e) => this.sortHandler(e));  
+    this.subElements.header.addEventListener('pointerdown', this.handleHeaderPointerDown);  
     const sortableColumns = this.subElements.header.querySelectorAll('.sortable-table__cell');
     for (let column of sortableColumns) {
       column.setAttribute('data-order', 'asc');
     }
   }
 
-  sortHandler(event) {
+  handleHeaderPointerDown = (event) => {
     let headerCell = event.target.closest('.sortable-table__cell');
 
-    if (!headerCell || !this.subElements.header.contains(headerCell)) {
+    if (!headerCell) {
       return;
     }
 
@@ -52,7 +53,7 @@ export default class SortableTable extends TableCommmon {
   }
 
   destroy() {
-    document.removeEventListener('pointerdown', (e) => this.sortHandler(e));
+    this.subElements.header.removeEventListener('pointerdown', this.handleHeaderPointerDown);
     super.destroy();
   }
 }
