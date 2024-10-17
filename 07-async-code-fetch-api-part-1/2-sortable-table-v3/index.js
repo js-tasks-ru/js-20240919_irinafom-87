@@ -4,6 +4,11 @@ import TableBase from '../../06-events-practice/1-sortable-table-v2/index.js';
 const BACKEND_URL = 'https://course-js.javascript.ru';
 
 export default class SortableTable extends TableBase {
+  start = 0;
+  end = 10;
+  fieldValue = 'title';
+  fieldOrder = 'asc';
+
   constructor(headersConfig, props = {}) {
     super(headersConfig, props);
     const {
@@ -20,6 +25,33 @@ export default class SortableTable extends TableBase {
     this.from = new Date();
     this.from.setDate(this.to.getMonth() - 1);
     this.render();
+
+    this.handleWindowScroll = this.handleWindowScroll.bind(this);
+    window.addEventListener('scroll', this.handleWindowScroll);
+  }
+
+  async handleWindowScroll() {
+    const docBottom = document.documentElement.getBoundingClientRect().bottom;
+
+    let loading = false;
+    while (!loading) {
+      // нижняя граница документа
+      let windowRelativeBottom = document.documentElement.getBoundingClientRect().bottom;
+      let loadingCondition = windowRelativeBottom > document.documentElement.clientHeight + 100;
+      // если пользователь не прокрутил достаточно далеко (>100px до конца страницы) — прерываем цикл
+      if (loadingCondition || loading) {
+        break;
+      }  
+
+      loading = true;
+      
+      // добавим больше данных
+      this.start += 10;
+      this.end += 10;
+      await this.loadData({ id: this.fieldValue, order: this.fieldOrder });
+      this.subElements.body.innerHTML = this.createRowsTemplate();
+      loading = false;
+    }
   }
 
   async loadData(sorted = { id: 'title', order: 'asc' }) {
@@ -28,8 +60,8 @@ export default class SortableTable extends TableBase {
     url.searchParams.set('to', this.to);
     url.searchParams.set('_sort', sorted.id);
     url.searchParams.set('_order', sorted.order);
-    url.searchParams.set('_start', 0);
-    url.searchParams.set('_end', 10);
+    url.searchParams.set('_start', this.start);
+    url.searchParams.set('_end', this.end);
 
     let response = await fetch(url.toString());
     let data = await response.json();
