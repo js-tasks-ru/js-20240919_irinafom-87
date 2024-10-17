@@ -1,4 +1,7 @@
 export default class DoubleSlider {  
+  element;
+  subElements = {};
+
   constructor(props = {}) {
     const {
       min = 100,
@@ -21,31 +24,39 @@ export default class DoubleSlider {
     this.leftThumbler = null;
     this.rightThumbler = null;
     
-    this.render();
+    this.element = this.createSliderElement();
+    this.selectSubElements();
     this.initialize();
     this.updateStyles();
   }
 
-  render() {
+  selectSubElements = () => {
+    const dataElements = this.element.querySelectorAll('[data-element]');
+    dataElements.forEach(item => {
+      this.subElements[item.dataset.element] = item;
+    });
+  }
+
+  createSliderElement() {
     const wrapper = document.createElement('div');
     wrapper.innerHTML = this.createSliderTemplate();
-    this.element = wrapper.firstElementChild; 
+    return wrapper.firstElementChild; 
   }
 
   initialize() {
-    this.leftThumbler = this.element.querySelector('.range-slider__thumb-left');
-    this.rightThumbler = this.element.querySelector('.range-slider__thumb-right');
+    this.leftThumbler = this.subElements.leftThumbler;
+    this.rightThumbler = this.subElements.rightThumbler;
 
     this.createEventListeners();
   }
 
   createEventListeners() {
-    document.addEventListener('pointerdown', this.handleThumbDown);
-    document.addEventListener('pointerup', this.handleThumbUp);
+    document.addEventListener('pointerdown', this.handleDocumentThumbDown);
+    document.addEventListener('pointerup', this.handleDocumentThumbUp);
   }
   
   calculateThumblers(e) {
-    const sliderInner = this.element.querySelector('.range-slider__inner');
+    const sliderInner = this.subElements.innerSlider;
     const rect = sliderInner.getBoundingClientRect();
 
     return Math.round(
@@ -53,7 +64,7 @@ export default class DoubleSlider {
     ) + this.min;
   }
 
-  handleThumbDown = (e) => {
+  handleDocumentThumbDown = (e) => {
     switch (e.target) {
     case this.leftThumbler:
       this.leftThumbler.classList.add('range-slider_dragging');
@@ -69,10 +80,10 @@ export default class DoubleSlider {
       break;
     }
 
-    document.addEventListener('pointermove', this.handleThumbMove);
+    document.addEventListener('pointermove', this.handleDocumentThumbMove);
   }
 
-  handleThumbMove = (e) => {
+  handleDocumentThumbMove = (e) => {
     switch (this.activeThumb) {
     case 'left':
       this.from = Math.max(
@@ -96,9 +107,8 @@ export default class DoubleSlider {
     
     this.updateStyles();
   } 
-
   
-  handleThumbUp = () => {
+  handleDocumentThumbUp = () => {
     this.toggleDispatchEvent();
     if (this.leftThumbler.classList.contains('range-slider_dragging')) {
       this.leftThumbler.classList.remove('range-slider_dragging');
@@ -106,7 +116,7 @@ export default class DoubleSlider {
       this.rightThumbler.classList.remove('range-slider_dragging');
     }
 
-    document.removeEventListener('pointermove', this.handleThumbMove);
+    document.removeEventListener('pointermove', this.handleDocumentThumbMove);
   }
 
   toggleDispatchEvent() {
@@ -116,10 +126,10 @@ export default class DoubleSlider {
   }
 
   updateStyles() {
-    const sliderProgress = this.element.querySelector('.range-slider__progress');
+    const sliderProgress = this.subElements.sliderProgress;
 
-    const fromDataElem = this.element.querySelector("[data-element=from]");
-    const toDataElem = this.element.querySelector("[data-element=to]");
+    const fromDataElement = this.subElements.from;
+    const toDataElement = this.subElements.to;
 
     const leftThumblerPosition = (this.from - this.min) / (this.max - this.min) * 100;
     const rightThumblerPosition = (this.max - this.to) / (this.max - this.min) * 100;
@@ -132,18 +142,18 @@ export default class DoubleSlider {
       right: ${rightThumblerPosition}%
     `;
 
-    fromDataElem.textContent = this.formatValue(`${this.from}`);
-    toDataElem.textContent = this.formatValue(`${this.to}`);
+    fromDataElement.textContent = this.formatValue(`${this.from}`);
+    toDataElement.textContent = this.formatValue(`${this.to}`);
   }
 
   createSliderTemplate() {
     return `
         <div class="range-slider">
             <span data-element="from">${this.formatValue(this.from)}</span>
-            <div class="range-slider__inner">
-                <span class="range-slider__progress"></span>
-                <span class="range-slider__thumb-left"></span>
-                <span class="range-slider__thumb-right"></span>
+            <div data-element="innerSlider" class="range-slider__inner">
+                <span data-element="sliderProgress" class="range-slider__progress"></span>
+                <span data-element="leftThumbler" class="range-slider__thumb-left"></span>
+                <span data-element="rightThumbler" class="range-slider__thumb-right"></span>
             </div>
             <span data-element="to">${this.formatValue(this.to)}</span>
         </div>
@@ -151,9 +161,9 @@ export default class DoubleSlider {
   }
 
   removeEventListeners() {
-    document.removeEventListener('pointerdown', this.handleThumbDown);
-    document.removeEventListener('pointermove', this.handleThumbMove);
-    document.removeEventListener('pointerup', this.handleThumbUp);
+    document.removeEventListener('pointerdown', this.handleDocumentThumbDown);
+    document.removeEventListener('pointermove', this.handleDocumentThumbMove);
+    document.removeEventListener('pointerup', this.handleDocumentThumbUp);
   }
 
   destroy() {
