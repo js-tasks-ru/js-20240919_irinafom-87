@@ -79,6 +79,7 @@ export default class SortableTable {
             ${this.createRowsTemplate()}
           </div>
         </div>
+      </div>
     `;
   }
 

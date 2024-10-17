@@ -16,7 +16,7 @@ export default class ColumnChart {
       link = '#',
       data = []
     } = props;
-    const { from = new Date().setDate(new Date().getMonth - 1), to = new Date() } = range;
+    const { from = new Date().setDate(new Date().getMonth() - 1), to = new Date() } = range;
 
     this.url = url;
     this.from = from;

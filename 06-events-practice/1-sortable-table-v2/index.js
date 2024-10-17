@@ -9,6 +9,7 @@ export default class SortableTable extends TableCommmon {
     const {
       data = [],
       sorted = {},
+      isSortLocally = true
     } = props;
 
     this.defaultSorted = {
@@ -16,12 +17,14 @@ export default class SortableTable extends TableCommmon {
 
       order: sorted.order
     };
+    this.isSortLocally = isSortLocally;
 
     this.arrow = this.createElement(this.createArrowTemplate());
 
     const defaultSortedCell = this.subElements.header.querySelectorAll(`[data-id=${this.defaultSorted.id}]`)?.[0];
     defaultSortedCell.append(this.arrow);
 
+    this.handleHeaderPointerDown = this.handleHeaderPointerDown.bind(this);
     this.subElements.header.addEventListener('pointerdown', this.handleHeaderPointerDown);  
     const sortableColumns = this.subElements.header.querySelectorAll('.sortable-table__cell');
     for (let column of sortableColumns) {
