@@ -47,6 +47,22 @@ export default class SortableTable extends TableCommmon {
     headerCell.dataset.order = fieldOrder;
   }
 
+  sort(fieldValue, fieldOrder) {
+    if (this.isSortLocally) {
+      this.sortOnClient(fieldValue, fieldOrder);
+    } else {
+      this.sortOnServer(fieldValue, fieldOrder);
+    }
+  }
+
+  sortOnClient(fieldValue, fieldOrder) {
+    super.sort(fieldValue, fieldOrder);
+  }
+
+  sortOnServer() {
+    
+  }
+
   createArrowTemplate() {
     return `
       <span data-element="arrow" class="sortable-table__sort-arrow">

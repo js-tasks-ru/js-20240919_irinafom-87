@@ -42,18 +42,6 @@ export default class SortableTable extends TableBase {
     this.subElements.body.innerHTML = this.createRowsTemplate();
   }
 
-  sort(fieldValue, fieldOrder) {
-    if (this.isSortLocally) {
-      this.sortOnClient(fieldValue, fieldOrder);
-    } else {
-      this.sortOnServer(fieldValue, fieldOrder);
-    }
-  }
-
-  sortOnClient(fieldValue, fieldOrder) {
-    super.sort(fieldValue, fieldOrder);
-  }
-
   async sortOnServer(fieldValue, fieldOrder) {
     await this.loadData({ id: fieldValue, order: fieldOrder });
     this.subElements.body.innerHTML = this.createRowsTemplate();
