@@ -2,6 +2,8 @@ import TableCommmon from '../../05-dom-document-loading/2-sortable-table-v1/inde
 
 export default class SortableTable extends TableCommmon {
   arrow;
+  fieldValue;
+  fieldOrder;
 
   constructor(headerConfig = [], props = {}) {
     super(headerConfig, props.data);
@@ -9,6 +11,7 @@ export default class SortableTable extends TableCommmon {
     const {
       data = [],
       sorted = {},
+      isSortLocally = true
     } = props;
 
     this.defaultSorted = {
@@ -16,12 +19,14 @@ export default class SortableTable extends TableCommmon {
 
       order: sorted.order
     };
+    this.isSortLocally = isSortLocally;
 
     this.arrow = this.createElement(this.createArrowTemplate());
 
     const defaultSortedCell = this.subElements.header.querySelectorAll(`[data-id=${this.defaultSorted.id}]`)?.[0];
     defaultSortedCell.append(this.arrow);
 
+    this.handleHeaderPointerDown = this.handleHeaderPointerDown.bind(this);
     this.subElements.header.addEventListener('pointerdown', this.handleHeaderPointerDown);  
     const sortableColumns = this.subElements.header.querySelectorAll('.sortable-table__cell');
     for (let column of sortableColumns) {
@@ -36,12 +41,28 @@ export default class SortableTable extends TableCommmon {
       return;
     }
 
-    const fieldValue = headerCell.dataset.id;
-    const fieldOrder = headerCell.dataset.order === 'asc' ? 'desc' : 'asc';
+    this.fieldValue = headerCell.dataset.id;
+    this.fieldOrder = headerCell.dataset.order === 'asc' ? 'desc' : 'asc';
 
-    this.sort(fieldValue, fieldOrder);
+    this.sort(this.fieldValue, this.fieldOrder);
     headerCell.append(this.arrow);
-    headerCell.dataset.order = fieldOrder;
+    headerCell.dataset.order = this.fieldOrder;
+  }
+
+  sort(fieldValue, fieldOrder) {
+    if (this.isSortLocally) {
+      this.sortOnClient(fieldValue, fieldOrder);
+    } else {
+      this.sortOnServer(fieldValue, fieldOrder);
+    }
+  }
+
+  sortOnClient(fieldValue, fieldOrder) {
+    super.sort(fieldValue, fieldOrder);
+  }
+
+  sortOnServer() {
+    
   }
 
   createArrowTemplate() {
