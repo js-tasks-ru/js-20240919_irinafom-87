@@ -30,32 +30,29 @@ export default class SortableTable extends TableBase {
     window.addEventListener('scroll', this.handleWindowScroll);
   }
 
+  handleHeaderPointerDown() {
+    super.handleHeaderPointerDown();
+    this.subElements.body.innerHTML = this.createRowsTemplate();
+  }
+
   async handleWindowScroll() {
-    const docBottom = document.documentElement.getBoundingClientRect().bottom;
-
-    let loading = false;
-    while (!loading) {
-      // нижняя граница документа
-      let windowRelativeBottom = document.documentElement.getBoundingClientRect().bottom;
-      let loadingCondition = windowRelativeBottom > document.documentElement.clientHeight + 100;
-      // если пользователь не прокрутил достаточно далеко (>100px до конца страницы) — прерываем цикл
-      if (loadingCondition || loading) {
-        break;
-      }  
-
-      loading = true;
-      
-      // добавим больше данных
-      this.start += 10;
-      this.end += 10;
-      await this.loadData({ id: this.fieldValue, order: this.fieldOrder });
-      this.subElements.body.innerHTML = this.createRowsTemplate();
-      loading = false;
-    }
+    // нижняя граница документа
+    let windowRelativeBottom = document.documentElement.getBoundingClientRect().bottom;
+    let loadingCondition = windowRelativeBottom > document.documentElement.clientHeight + 100;
+    // если пользователь не прокрутил достаточно далеко (>100px до конца страницы) — прерываем цикл
+    if (loadingCondition) {
+      return;
+    }  
+     
+    // добавим больше данных
+    this.start += 10;
+    this.end += 10;
+    await this.loadData({ id: this.fieldValue, order: this.fieldOrder });
+    this.subElements.body.innerHTML = this.createRowsTemplate();
   }
 
   async loadData(sorted = { id: 'title', order: 'asc' }) {
-    let url = new URL(`${BACKEND_URL}/${this.url}`);
+    const url = new URL(`${BACKEND_URL}/${this.url}`);
     url.searchParams.set('from', this.from);
     url.searchParams.set('to', this.to);
     url.searchParams.set('_sort', sorted.id);
@@ -63,8 +60,7 @@ export default class SortableTable extends TableBase {
     url.searchParams.set('_start', this.start);
     url.searchParams.set('_end', this.end);
 
-    let response = await fetch(url.toString());
-    let data = await response.json();
+    const data = await fetchJson(url.toString());
 
     this.data = data;
   }

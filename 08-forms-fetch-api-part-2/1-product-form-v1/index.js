@@ -9,6 +9,9 @@ export default class ProductForm {
   element;
   subElements = {};
   categories;
+  productId;
+  savedEvent = new CustomEvent('product-saved');
+  updatedEvent = new CustomEvent('product-updated');
   constructor (productId) {
     this.productId = productId;
 
@@ -57,11 +60,23 @@ export default class ProductForm {
     this.subElements.productForm.addEventListener('submit', this.handleSubmit);
   }
 
-  handleSubmit = (event) => {
-    // event.preventDefault();
-    console.dir(this.subElements.productForm.outerHTML);
+  handleSubmit = async (event) => {
+    event.preventDefault();
+    this.save();
+  }
+
+  async save() {
+    const url = new URL(`${BACKEND_URL}/${PRODUCTS_PATH}`);
     const formData = new FormData(this.subElements.productForm);
-    console.dir(JSON.stringify(formData));
+    const method = this.productId ? 'PATCH' : 'PUT';
+    const result = await fetchJson(url.toString(), {
+      body: formData,
+      method: method
+    });
+
+    const customEvent = this.productId ? this.updatedEvent : this.savedEvent ;
+
+    this.element.dispatchEvent(customEvent);
   }
 
   fillImagesData() {
@@ -105,11 +120,11 @@ export default class ProductForm {
 
     for (const key of keys) {
       this.subElements.productForm.querySelector(`#${key}`).value = this.data[key];
+      this.subElements.productForm.querySelector(`#${key}`).setAttribute('value', this.data[key]);
     }
 
-    console.dir(this.subElements.productForm.innerHTML);
-    const formData = new FormData(this.subElements.productForm);
-    console.dir(JSON.stringify(formData));
+    // const formData = new FormData(this.subElements.productForm);
+    // console.log(...formData);
   }
 
   createOptionsListTemplate(categories) {
@@ -137,12 +152,12 @@ export default class ProductForm {
           <div class="form-group form-group__half_left">
             <fieldset>
               <label class="form-label">Название товара</label>
-              <input required="" type="text" name="title" id="title" class="form-control" placeholder="Название товара" value="">
+              <input required="" type="text" name="title" id="title" value="" class="form-control" placeholder="Название товара">
             </fieldset>
           </div>
           <div class="form-group form-group__wide">
             <label class="form-label">Описание</label>
-            <textarea required="" class="form-control" name="description" id="description" data-element="productDescription" placeholder="Описание товара"></textarea>
+            <textarea required="" class="form-control" name="description" id="description" value="" data-element="productDescription" placeholder="Описание товара"></textarea>
           </div>
           <div class="form-group form-group__wide" data-element="sortable-list-container">
             <label class="form-label">Фото</label>
@@ -154,7 +169,7 @@ export default class ProductForm {
           </div>
           <div class="form-group form-group__half_left">
             <label class="form-label">Категория</label>
-            <select data-element="subcategory" class="form-control" name="subcategory" id="subcategory">
+            <select data-element="subcategory" class="form-control" name="subcategory" id="subcategory" value="">
               <option value="progulki-i-detskaya-komnata">Детские товары и игрушки &gt; Прогулки и детская комната</option>
               <option value="kormlenie-i-gigiena">Детские товары и игрушки &gt; Кормление и гигиена</option>
             </select>
@@ -162,20 +177,20 @@ export default class ProductForm {
           <div class="form-group form-group__half_left form-group__two-col">
             <fieldset>
               <label class="form-label">Цена ($)</label>
-              <input required="" type="number" name="price" id="price" class="form-control" placeholder="100">
+              <input required="" type="number" name="price" id="price" value="" class="form-control" placeholder="100">
             </fieldset>
             <fieldset>
               <label class="form-label">Скидка ($)</label>
-              <input required="" type="number" name="discount" id="discount" class="form-control" placeholder="0">
+              <input required="" type="number" name="discount" id="discount" value="" class="form-control" placeholder="0">
             </fieldset>
           </div>
           <div class="form-group form-group__part-half">
             <label class="form-label">Количество</label>
-            <input required="" type="number" class="form-control" name="quantity" id="quantity" placeholder="1">
+            <input required="" type="number" class="form-control" name="quantity" id="quantity" value="" placeholder="1">
           </div>
           <div class="form-group form-group__part-half">
             <label class="form-label">Статус</label>
-            <select class="form-control" name="status" id="status">
+            <select class="form-control" name="status" id="status" value="">
               <option value="1">Активен</option>
               <option value="0">Неактивен</option>
             </select>
