@@ -36,15 +36,13 @@ export default class SortableTable extends TableBase {
   }
 
   async handleWindowScroll() {
-    // нижняя граница документа
-    let windowRelativeBottom = document.documentElement.getBoundingClientRect().bottom;
-    let loadingCondition = windowRelativeBottom > document.documentElement.clientHeight + 100;
-    // если пользователь не прокрутил достаточно далеко (>100px до конца страницы) — прерываем цикл
+    const windowRelativeBottom = document.documentElement.getBoundingClientRect().bottom;
+    const loadingCondition = windowRelativeBottom > document.documentElement.clientHeight + 100;
+
     if (loadingCondition) {
       return;
     }  
      
-    // добавим больше данных
     this.start += 10;
     this.end += 10;
     await this.loadData({ id: this.fieldValue, order: this.fieldOrder });

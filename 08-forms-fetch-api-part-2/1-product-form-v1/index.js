@@ -10,8 +10,7 @@ export default class ProductForm {
   subElements = {};
   categories;
   productId;
-  savedEvent = new CustomEvent('product-saved');
-  updatedEvent = new CustomEvent('product-updated');
+
   constructor (productId) {
     this.productId = productId;
 
@@ -39,7 +38,7 @@ export default class ProductForm {
 
   async render () {
     await this.loadData();
-    document.body.append(this.element);
+    return this.element;
   }
 
   async loadData() {
@@ -74,14 +73,14 @@ export default class ProductForm {
       method: method
     });
 
-    const customEvent = this.productId ? this.updatedEvent : this.savedEvent ;
+    const customEvent = this.productId ? new CustomEvent('product-updated') : new CustomEvent('product-saved') ;
 
     this.element.dispatchEvent(customEvent);
   }
 
   fillImagesData() {
     const imageContainer = this.subElements.imageListContainer.firstElementChild;
-    for (let image of this.data.images) {
+    for (const image of this.data.images) {
       const div = document.createElement('div');
       div.innerHTML = this.createImageTemplate(image.url, image.source);
       imageContainer.append(div.firstElementChild);
@@ -89,6 +88,8 @@ export default class ProductForm {
   }
 
   createImageTemplate(url, source) {
+    source = escapeHtml(source);
+    url = escapeHtml(url);
     return `
       <li class="products-edit__imagelist-item sortable-list__item" style="">
         <input type="hidden" name="url" value="${url}">
@@ -120,11 +121,7 @@ export default class ProductForm {
 
     for (const key of keys) {
       this.subElements.productForm.querySelector(`#${key}`).value = this.data[key];
-      this.subElements.productForm.querySelector(`#${key}`).setAttribute('value', this.data[key]);
     }
-
-    // const formData = new FormData(this.subElements.productForm);
-    // console.log(...formData);
   }
 
   createOptionsListTemplate(categories) {
