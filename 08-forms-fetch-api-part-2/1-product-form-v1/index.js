@@ -3,6 +3,7 @@ import fetchJson from './utils/fetch-json.js';
 
 const IMGUR_CLIENT_ID = '28aaa2e823b03b1';
 const BACKEND_URL = 'https://course-js.javascript.ru';
+const PRODUCTS_PATH = 'api/rest/products';
 
 export default class ProductForm {
   element;
@@ -13,54 +14,12 @@ export default class ProductForm {
 
     this.element = this.createElement(this.createElementTemplate());
     this.selectSubElements();
-
-    this.loadData();
   }
 
   selectSubElements() {
     this.element.querySelectorAll('[data-element]').forEach(item => {
       this.subElements[item.dataset.element] = item;
     });
-    // console.dir(this.subElements);
-  }
-
-  async loadData() {
-    await this.loadCategories();
-    if (this.productId) {
-      await this.loadProduct();
-    }
-  }
-
-  async loadProduct() {
-    const path = 'api/rest/products';
-    const url = new URL(`${BACKEND_URL}/${path}`);
-    url.searchParams.set('id', this.productId);
-    const result = await fetchJson(url.toString());
-    this.data = result[0];
-    this.fillFormData();
-  }
-
-  fillFormData() {
-    console.dir('fill');
-    const defaultFormData = {
-      title: '',
-      // description: '',
-      // quantity: 1,
-      // subcategory: '',
-      // status: 1,
-      // price: 100,
-      // discount: 0
-    };
-
-    const keys = Object.keys(defaultFormData);
-    console.dir('----');
-    // console.dir(this.data);
-    for (const key of keys) {
-      this.subElements.productForm.querySelector(`#${key}`).value = this.data[key];
-
-      console.dir(key);
-      console.dir(this.subElements.productForm.querySelector(`#${key}`).value);
-    }
   }
 
   async loadCategories() {
@@ -73,6 +32,84 @@ export default class ProductForm {
     this.categories = data; 
     this.subElements.subcategory.innerHTML = this.createOptionsListTemplate(data);
     return data;    
+  }
+
+  async render () {
+    await this.loadData();
+    document.body.append(this.element);
+  }
+
+  async loadData() {
+    await this.loadCategories();
+    if (this.productId) {
+      await this.loadProduct();
+    }
+  }
+
+  async loadProduct() {
+    const url = new URL(`${BACKEND_URL}/${PRODUCTS_PATH}`);
+    url.searchParams.set('id', this.productId);
+    const result = await fetchJson(url.toString());
+    this.data = result[0];
+    this.fillFormData();
+    this.fillImagesData();
+
+    this.subElements.productForm.addEventListener('submit', this.handleSubmit);
+  }
+
+  handleSubmit = (event) => {
+    // event.preventDefault();
+    console.dir(this.subElements.productForm.outerHTML);
+    const formData = new FormData(this.subElements.productForm);
+    console.dir(JSON.stringify(formData));
+  }
+
+  fillImagesData() {
+    const imageContainer = this.subElements.imageListContainer.firstElementChild;
+    for (let image of this.data.images) {
+      const div = document.createElement('div');
+      div.innerHTML = this.createImageTemplate(image.url, image.source);
+      imageContainer.append(div.firstElementChild);
+    }
+  }
+
+  createImageTemplate(url, source) {
+    return `
+      <li class="products-edit__imagelist-item sortable-list__item" style="">
+        <input type="hidden" name="url" value="${url}">
+        <input type="hidden" name="source" value="${source}">
+        <span>
+          <img src="icon-grab.svg" data-grab-handle="" alt="grab">
+          <img class="sortable-table__cell-img" alt="${source}" src="${url}">
+          <span>${source}</span>
+        </span>
+        <button type="button">
+          <img src="icon-trash.svg" data-delete-handle="" alt="delete">
+        </button>
+      </li>
+    `;
+  }
+
+  fillFormData() {
+    const defaultFormData = {
+      title: '',
+      description: '',
+      quantity: 1,
+      subcategory: '',
+      status: 1,
+      price: 100,
+      discount: 0
+    };
+
+    const keys = Object.keys(defaultFormData);
+
+    for (const key of keys) {
+      this.subElements.productForm.querySelector(`#${key}`).value = this.data[key];
+    }
+
+    console.dir(this.subElements.productForm.innerHTML);
+    const formData = new FormData(this.subElements.productForm);
+    console.dir(JSON.stringify(formData));
   }
 
   createOptionsListTemplate(categories) {
@@ -100,7 +137,7 @@ export default class ProductForm {
           <div class="form-group form-group__half_left">
             <fieldset>
               <label class="form-label">Название товара</label>
-              <input required="" type="text" name="title" id="title" class="form-control" placeholder="Название товара">
+              <input required="" type="text" name="title" id="title" class="form-control" placeholder="Название товара" value="">
             </fieldset>
           </div>
           <div class="form-group form-group__wide">
@@ -109,17 +146,10 @@ export default class ProductForm {
           </div>
           <div class="form-group form-group__wide" data-element="sortable-list-container">
             <label class="form-label">Фото</label>
-            <div data-element="imageListContainer"><ul class="sortable-list"><li class="products-edit__imagelist-item sortable-list__item" style="">
-              <input type="hidden" name="url" value="https://fototrap.ru/wp-content/uploads/2023/10/milyi-multiashnyi-kot-1-1.webp">
-              <input type="hidden" name="source" value="75462242_3746019958756848_838491213769211904_n.jpg">
-              <span>
-                <img src="icon-grab.svg" data-grab-handle="" alt="grab">
-                <img class="sortable-table__cell-img" alt="Image" src="https://fototrap.ru/wp-content/uploads/2023/10/milyi-multiashnyi-kot-1-1.webp">
-                <span>75462242_3746019958756848_838491213769211904_n.jpg</span>
-              </span>
-              <button type="button">
-                <img src="icon-trash.svg" data-delete-handle="" alt="delete">
-              </button></li></ul></div>
+            <div data-element="imageListContainer">
+              <ul class="sortable-list">
+              </ul>
+            </div>
             <button type="button" name="uploadImage" class="button-primary-outline"><span>Загрузить</span></button>
           </div>
           <div class="form-group form-group__half_left">
@@ -158,10 +188,6 @@ export default class ProductForm {
         </form>
       </div>
     `;
-  }
-
-  async render () {
-    document.body.append(this.element);
   }
 
   remove() {
