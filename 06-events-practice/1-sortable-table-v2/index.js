@@ -4,6 +4,8 @@ export default class SortableTable extends TableCommmon {
   arrow;
   fieldValue;
   fieldOrder;
+  start = 0;
+  end = 10;
 
   constructor(headerConfig = [], props = {}) {
     super(headerConfig, props.data);
@@ -35,6 +37,9 @@ export default class SortableTable extends TableCommmon {
   }
 
   handleHeaderPointerDown = (event) => {
+    this.start = 0;
+    this.end = 10;
+    
     let headerCell = event.target.closest('.sortable-table__cell');
 
     if (!headerCell) {

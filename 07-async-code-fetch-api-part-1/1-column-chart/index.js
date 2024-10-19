@@ -26,30 +26,28 @@ export default class ColumnChart {
     this.data = data;
 
     this.element = this.createElement(this.createElementTemplate());
-    document.body.append(this.element);
     this.selectSubElements();
     this.toggleChartLoadingClass();
   }
 
   selectSubElements() {
-    const dataElements = document.querySelectorAll('[data-element]');
+    const dataElements = this.element.querySelectorAll('[data-element]');
     dataElements.forEach(item => {
       this.subElements[item.dataset.element] = item;
     });
   }
 
   async update() {
-    let url = new URL(`${BACKEND_URL}/${this.url}`);
+    const url = new URL(`${BACKEND_URL}/${this.url}`);
     url.searchParams.set('from', this.from);
     url.searchParams.set('to', this.to);
     
-    let response = await fetch(url.toString());
-    let data = await response.json();
+    const data = await fetchJson(url.toString());
 
     this.data = Array.from(Object.entries(data));
     this.toggleChartLoadingClass();
 
-    this.render();
+    this.subElements.body.innerHTML = this.createChartTemplate();
     return data;
   }
 
@@ -59,10 +57,6 @@ export default class ColumnChart {
     } else {
       this.element.classList.remove('column-chart_loading');
     }
-  }
-
-  render() {
-    this.subElements.body.innerHTML = this.createChartTemplate();
   }
 
   createChartTemplate() {

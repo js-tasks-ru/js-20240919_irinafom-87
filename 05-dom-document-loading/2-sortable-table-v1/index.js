@@ -53,8 +53,12 @@ export default class SortableTable {
     let row = '';
     for (const item of this.data) {
       let cells = '';
-      for (const field of this.fieldsFromHeader) {
-        cells += `<div class="sortable-table__cell">${item[field]}</div>`;
+      for (const columnConfig of this.headerConfig) {
+        if (columnConfig.template) {
+          cells += columnConfig.template(item[columnConfig.id]);
+        } else {
+          cells += `<div class="sortable-table__cell">${item[columnConfig.id]}</div>`;
+        }
       }
       row += `
         <a href="/" class="sortable-table__row">
