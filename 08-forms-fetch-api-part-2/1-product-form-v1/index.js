@@ -79,12 +79,20 @@ export default class ProductForm {
   }
 
   fillImagesData() {
-    const imageContainer = this.subElements.imageListContainer.firstElementChild;
+    const imageContainer = this.subElements.imageListContainer;
+    imageContainer.append(this.createList());
+  }
+
+  createList() {
+    const ul = document.createElement('ul');
+    ul.classList.add('sortable-list');
+
     for (const image of this.data.images) {
       const div = document.createElement('div');
       div.innerHTML = this.createImageTemplate(image.url, image.source);
-      imageContainer.append(div.firstElementChild);
+      ul.append(div.firstElementChild);
     }
+    return ul;
   }
 
   createImageTemplate(url, source) {
@@ -126,8 +134,8 @@ export default class ProductForm {
 
   createOptionsListTemplate(categories) {
     let options = [];
-    for (let category of categories) {
-      for (let subcategory of category.subcategories) {
+    for (const category of categories) {
+      for (const subcategory of category.subcategories) {
         const option = `<option value="${subcategory.id}">${category.title} > ${subcategory.title}</option>`;
         options.push(option);
       }
@@ -159,8 +167,6 @@ export default class ProductForm {
           <div class="form-group form-group__wide" data-element="sortable-list-container">
             <label class="form-label">Фото</label>
             <div data-element="imageListContainer">
-              <ul class="sortable-list">
-              </ul>
             </div>
             <button type="button" name="uploadImage" class="button-primary-outline"><span>Загрузить</span></button>
           </div>
