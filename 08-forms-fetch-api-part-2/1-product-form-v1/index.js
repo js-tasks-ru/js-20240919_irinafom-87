@@ -134,8 +134,8 @@ export default class ProductForm {
 
   createOptionsListTemplate(categories) {
     let options = [];
-    for (let category of categories) {
-      for (let subcategory of category.subcategories) {
+    for (const category of categories) {
+      for (const subcategory of category.subcategories) {
         const option = `<option value="${subcategory.id}">${category.title} > ${subcategory.title}</option>`;
         options.push(option);
       }

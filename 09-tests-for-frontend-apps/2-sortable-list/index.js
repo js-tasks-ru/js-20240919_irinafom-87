@@ -18,7 +18,7 @@ export default class SortableList {
   }
 
   addItems() {
-    for (let item of this.items) {
+    for (const item of this.items) {
       item.classList.add('sortable-list__item');
     }
     this.element.append(...this.items);
@@ -82,7 +82,7 @@ export default class SortableList {
     } else if (clientY > lastElementBottom) {
       this.movePlaceholderAt(children.length);
     } else {
-      for (let i = 0; i < children.length; i++) {
+      for (const i = 0; i < children.length; i++) {
         const li = children[i];
 
         if (li !== this.draggingElem) {
@@ -150,11 +150,11 @@ export default class SortableList {
 
   remove () {
     this.element.remove();
-    document.removeEventListener('pointermove', this.onDocumentPointerMove);
-    document.removeEventListener('pointerup', this.onDocumentPointerUp);
   }
 
   destroy () {
     this.remove();
+    document.removeEventListener('pointermove', this.onDocumentPointerMove);
+    document.removeEventListener('pointerup', this.onDocumentPointerUp);
   }
 }
