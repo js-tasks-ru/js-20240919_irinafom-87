@@ -13,14 +13,13 @@ export default class Page {
   components = {};
 
   constructor() {
-    
-  }  
-
-  async render() {
     this.element = this.createElement(this.createElementTemplate());
     this.selectSubElements();
 
     this.createComponents();
+  }  
+
+  async render() {
     this.renderComponents();
     this.createEventListeners();
 
@@ -128,7 +127,6 @@ export default class Page {
     this.element.querySelectorAll('[data-element]').forEach(item => {
       this.subElements[item.dataset.element] = item;      
     });
-    console.dir(this.subElements);
   }
 
   createElement(template) {
@@ -167,5 +165,6 @@ export default class Page {
 
   destroy() {
     this.remove();
+    this.removeEventListeners();
   }
 }
